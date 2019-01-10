@@ -1,0 +1,11 @@
+insert into t_raster_master (filename, data_type) values('AeroMag.tif', 'Aero magnetic data');
+insert into t_raster_master (filename, data_type) values('GravityAnomalyIsostatic.tif', 'Gravity Anomaly Isostatic');
+insert into t_raster_master (filename, data_type) values('ThRadiometric.tif', 'Th Radiometric');
+insert into t_raster_master (filename, data_type) values('GravityAnomalyBouguer.tif', 'Gravity Anomaly Bouger');
+insert into t_raster_master (filename, data_type) values('KRadiometric.tif', 'K Radiometric');
+insert into t_raster_master (filename, data_type) values('URadiometric.tif', 'U Radiometric');
+insert into t_raster_master(filename, data_type) values('GeologicAgeLow.tif', 'Geologic Age Low');
+insert into t_raster_master(filename, data_type) values('SpecificLithologyHigh.tif', 'Specific Lithology High');
+insert into t_raster_master(filename, data_type) values('DEM.tif', 'DEM');
+insert into t_raster_master(filename, data_type) values('GeneralLithologyLow.tif', 'General Lithology Low');
+insert into t_raster_master(filename, data_type) values('GeologicAgeHigh.tif', 'Geologic Age High');
