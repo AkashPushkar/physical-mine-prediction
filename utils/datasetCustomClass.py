@@ -28,37 +28,36 @@ def connectToServer():
 
 
 class data1(Dataset):
-	def __init__(self, connection, set='Train'):
+	def __init__(self, connection, set='Train', over_sampling= 0, flip= 0, rotate=0):
 		self.connection = connection
 
 		a = (self.connection).execute("SELECT site_id FROM t_site WHERE classifier != 'E' AND model_category = '{}'".format(set))
 		self.IDs = a.fetchall()
 
-		# For increasing the data : Start
-		if set = 'Train':
-			successID = increaseDataTemp(self.connection)
+		# Data augmentation
+		if set == 'Train':
+			successID = data_augmentation.augmentInput(connection= self.connection, over_sampling= over_sampling, flip= flip, rotate= rotate)
 			self.IDs = np.append(self.IDs, successID)
 
-		# For increasing the data : End
 
 		np.random.shuffle(self.IDs)
+		#self.IDs = self.IDs[0:2]
 
 
 	def __len__(self):
-		# l = (self.connection).execute("SELECT count(*) FROM t_site WHERE classifier != 'E' AND model_category = 'Train'")
-		# l = l.fetchall()
-		# # st()
-		# return (l[0]['count'])
-
 		return (len(self.IDs))
+
 
 	def __getitem__(self, idx):
 		
 		siteID = self.IDs[idx]
 		# siteID = 203
-		a = (self.connection).execute("SELECT r.filename, r.filepath, s.classifier FROM t_site s, t_raster_cropped r WHERE r.site_id = {} AND s.site_id = r.site_id ".format(siteID[0]))
+		#st()
+		siteID, decimal = divmod(siteID, 1)
+
+		a = (self.connection).execute("SELECT r.filename, r.filepath, s.classifier FROM t_site s, t_raster_cropped r WHERE r.site_id = {} AND s.site_id = r.site_id ".format(siteID))
 		a = a.fetchall()
-		
+			
 		inputshapeX = 64
 		inputshapeY = 64
 		finalinput = np.zeros([1, inputshapeX, inputshapeY])
@@ -88,6 +87,14 @@ class data1(Dataset):
 			# 	break
 			
 		finalinput = np.delete(finalinput, 0, 0)
+
+		# data augmentation depending upon the new siteID created
+		if decimal != 0:
+			if decimal < .10:
+				finalinput = data_augmentation.flip(finalinput, np.round(decimal, 2))
+			else:
+				finalinput = data_augmentation.rotate(finalinput, np.round(decimal, 2))
+
 		sample = {'input':finalinput, 'class':label}
 		
 		return sample
