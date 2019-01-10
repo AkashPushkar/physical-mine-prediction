@@ -20,22 +20,64 @@ def normalizeInput(x):
 						# x[batch,channel,:,:] = x[batch,channel,:,:] - m
 		return x
 
-def dataAugmentation(**kwargs):
-	successID = con.execute("SELECT site_id FROM t_site WHERE classifier != 'E' AND model_category = 'Train' AND classifier = 'S'")
+
+def augmentInput(connection, over_sampling= 1, flip= 1, rotate=1):
+
+	successID = connection.execute("SELECT site_id FROM t_site WHERE classifier != 'E' AND model_category = 'Train' AND classifier = 'S'")
 	successID = successID.fetchall()
-
-
-
-
-def overSampling(con):
-	sum = []
-	for i in range(4):
-		sum = sum + successID
+	successID = np.asarray(successID)
+	
+	ao = overSampling(successID ,over_sampling)
+	af = flipID(successID ,flip)
+	ar = rotateID(successID ,rotate)
+	#st()
+	successID = np.concatenate((np.transpose(successID), [ao], [af], [ar]), axis = 1)
+	#st()
 	return successID
 
-def flip():
+def overSampling(successID, n):
+	sum = []
+	for i in range(n):
+		sum = np.append(sum, successID)
+	return sum
+
+def flipID(successID, n):
+	sum = [0]
+	for i in range(n):
+		sum1 = np.transpose(np.concatenate((successID + 0.01, successID + 0.02, successID+0.03), axis=0))
+		#st()	
+		sum = np.append(sum, sum1)
+	return sum[1:]
+
+def rotateID(successID, n):
+	sum = [0]
+	for i in range(n):
+		sum1 = np.transpose(np.concatenate(((successID + 0.11), (successID + 0.12), (successID+0.13)), axis =0))
+		sum = np.append(sum, sum1)
+	return sum[1:]	
+
+def flip(image, flipType):
+	
+	if flipType == 0.01:
+		for i in range(np.shape(image)[0]):
+			image[i,:,:] = np.flipud(image[i,:,:])	
+	elif flipType == 0.02:
+		for i in range(np.shape(image)[0]):
+			image[i,:,:] = np.fliplr(image[i,:,:])
+	else:
+		for i in range(np.shape(image)[0]):
+			image[i,:,:] = np.flipud(image[i,:,:])
+			image[i,:,:] = np.fliplr(image[i,:,:])
+
+	return image
 
 
-def rotate():
+def rotate(image, flipType):
+	if flipType == 0.11:
+		np.rot90(image, k=1, axes=(1,2))
+	elif flipType == 0.12:
+		np.rot90(image, k=2, axes=(1,2))
+	else:
+		np.rot90(image, k=-1, axes=(1,2))
 
-
+	return image
