@@ -21,12 +21,15 @@ Initialization
 '''
 
 device = torch.device('cuda')
-numberEpoch = 2
+numberEpoch = 50 
 batchSize = 50
 trainError = []
 testError = []
 batchNumber = []
-
+# Data augmentation variables 
+over_sampling = 2
+flip = 1
+rotate = 1
 
 '''
 Reading the data
@@ -35,10 +38,11 @@ Reading the data
 #samplingMethod = WeightedRandomSampler([0.05,0.95],25232,True)
 #st()
 conn = datasetCustomClass.connectToServer()
-a = datasetCustomClass.data1(conn)
+a = datasetCustomClass.data1(conn, set= 'Train', over_sampling= over_sampling, flip= flip, rotate=rotate)
 traindataloader = DataLoader(a, batch_size = batchSize)
 #traindataloader = DataLoader(a, batch_size = batchSize,sampler=samplingMethod)
-
+b = datasetCustomClass.data1(conn, set= 'Test', over_sampling= 0, flip= 0, rotate=0)
+testdataloader = DataLoader(b, batch_size= batchSize)
 
 '''
 Defining architecture
@@ -81,7 +85,7 @@ class Net(nn.Module):
 
 net = Net()
 
-print (net)
+# print (net)
 # Putting the model on device: CUDA
 net.to(device)
 
@@ -108,7 +112,8 @@ training of the network
 for epoch in range(numberEpoch):
 
 	running_loss = 0
-	for i_batch, batch_sampled in enumerate(traindataloader):
+	#for i_batch, (batch_sampled, batch_test) in enumerate(traindataloader, testdataloader):
+	for i_batch, batch_sampled in enumerate (traindataloader):
 		# inputs
 		inputs = batch_sampled['input'].float()
 		#st()
@@ -128,6 +133,8 @@ for epoch in range(numberEpoch):
 		out = net(inputs)
 		loss = criterion(out, label)
 		
+		
+		
 		loss.backward()
 		optimizer.step()
 		#st()
@@ -136,11 +143,24 @@ for epoch in range(numberEpoch):
 
 		# printing stat
 		running_loss += loss.item()
-		if i_batch % 200 == 0:
-			trainError.append(running_loss/200)
+		if i_batch % 1000 == 0:
+			trainError.append(running_loss/50)
+
+			# testLoss calculation
+			'''
+			inputTest = batch_test['input'].to(device)
+			labelTest = batch_test['class'].to(device)
+			outTest = net(inputTest)
+			lossTest = criterion(outTest, labelTest)
+			testError.append(lossTest.item())
+			'''
 			batchNumber.append(i_batch+1)
-			print("This result is at the interval of 200 Epochs: Epoch:{},Batch:{},loss:{}".format(epoch, i_batch, loss.item()))
+			
+			print("This result is at the interval of 50 Epochs: Epoch:{},Batch:{},loss:{}".format(epoch, i_batch, loss.item()))
 			running_loss = 0
 
+torch.save(net, '/home/ubuntu/kynesfield/scripts/py/akash/a.pt')
+
 print('Training Finished')
+
 
