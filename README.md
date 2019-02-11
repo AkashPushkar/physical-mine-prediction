@@ -1,4 +1,4 @@
-# Project Zero - Deep learning for mining
+# Project Zero 
 The figure below shows the framework developed for data collection, preparation and analysis. Finally, a machine learning model is developed.
 
 ![alt text](https://raw.githubusercontent.com/dannyseim/projectzero/master/docs/projectFramework.png)
